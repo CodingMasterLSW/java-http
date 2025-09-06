@@ -36,6 +36,7 @@ public class HttpRequest {
         }
         if (this.requestUri.hasUri("/login")) {
             loginProcess();
+            return;
         }
         this.requestUri =  requestUri.convertToHtmlUri();
     }
@@ -46,19 +47,26 @@ public class HttpRequest {
         String[] split = queryParam.split("[=&]");
         queryParams.put(split[0], split[1]);
         queryParams.put(split[2], split[3]);
-        loggingLoginUserInfo(queryParams);
+        if (isExistUser(queryParams)) {
+            this.requestUri = new RequestUri("/index.html");
+            return;
+        }
+        this.requestUri = new RequestUri("/401.html");
     }
 
-    private void loggingLoginUserInfo(final Map<String, String> queryParams) {
+    private boolean isExistUser(final Map<String, String> queryParams) {
         try {
             final User user = InMemoryUserRepository.findByAccount(queryParams.get("account"))
                     .orElseThrow(() -> new IllegalArgumentException("이런 유저는 없답니다."));
             if (user.checkPassword(queryParams.get("password"))) {
                 log.info(user.toString());
+                return true;
             }
         } catch (IllegalArgumentException e) {
             log.info(e.getMessage());
+            return false;
         }
+        return false;
     }
 
     public String getMethod() {
@@ -76,4 +84,5 @@ public class HttpRequest {
     public byte[] calculateBytes() {
         return this.requestUri.calculateBytes();
     }
+
 }

@@ -45,6 +45,7 @@ public class Http11Processor implements Runnable, Processor {
             outputStream.write(responseHeader.getBytes());
             outputStream.write(bytes);
             outputStream.flush();
+
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
@@ -67,7 +68,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private String getHeader(final byte[] bytes, String type) {
         return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
+                "HTTP/1.1" + "200" + "OK",
                 "Content-Type: text/" + type + ";charset=utf-8 ",
                 "Content-Length: " + bytes.length + " ",
                 ""
