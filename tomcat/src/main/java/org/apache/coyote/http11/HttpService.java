@@ -16,6 +16,16 @@ public class HttpService {
         return new HttpResponse(httpRequest.calculateBytes(), HttpStatus.SUCCESS);
     }
 
+    public HttpResponse registerProcess(HttpRequest httpRequest) {
+        if (httpRequest.getRequestUri().endWith("/register")) {
+            httpRequest.modifyRequestUri(httpRequest.getRequestUri().convertHtmlFromUri());
+            return new HttpResponse(httpRequest.calculateBytes(), HttpStatus.SUCCESS);
+        }
+        // TODO : 회원가입을 logic 작성
+        return new HttpResponse(httpRequest.calculateBytes(), HttpStatus.SUCCESS);
+
+    }
+
     public HttpResponse loginProcess(HttpRequest httpRequest) {
         if (httpRequest.getRequestUri().endWith("/login")) {
             httpRequest.modifyRequestUri(httpRequest.getRequestUri().convertHtmlFromUri());

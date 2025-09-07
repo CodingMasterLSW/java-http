@@ -45,6 +45,16 @@ public class Http11Processor implements Runnable, Processor {
                 outputStream.flush();
                 return;
             }
+
+            if (httpRequest.getRequestUri().hasUri("/register")) {
+                HttpResponse httpResponse = httpService.registerProcess(httpRequest);
+                String responseHeader = getResponseHeader(httpRequest.getRequestUri().getValue(), httpResponse);
+                outputStream.write(responseHeader.getBytes());
+                outputStream.write(httpResponse.getBody());
+                outputStream.flush();
+                return;
+            }
+
             HttpResponse httpResponse = httpService.basicProcess(httpRequest);
             String responseHeader = getResponseHeader(httpRequest.getRequestUri().getValue(), httpResponse);
             outputStream.write(responseHeader.getBytes());
