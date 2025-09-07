@@ -28,6 +28,14 @@ public class RequestUri {
         return this.value.contains(compareValue);
     }
 
+    public boolean endWith(String value) {
+        return this.value.endsWith(value);
+    }
+
+    public boolean isExistFile() {
+        return getClass().getClassLoader().getResource("static" + this.value) != null;
+    }
+
     public byte[] calculateBytes() {
         if (this.value.equals("/")) {
             return "Hello world!".getBytes(StandardCharsets.UTF_8);

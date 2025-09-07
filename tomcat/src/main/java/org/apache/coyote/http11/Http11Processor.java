@@ -15,6 +15,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final HttpService httpService = new HttpService();
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
@@ -36,14 +37,18 @@ public class Http11Processor implements Runnable, Processor {
 
             HttpRequest httpRequest = HttpRequest.createFrom(line);
 
-            httpRequest.queryParameterProcess();
-
-            byte[] bytes = httpRequest.calculateBytes();
-
-            final String responseHeader = getResponseHeader(httpRequest.getRequestUri().getValue(), bytes);
-
+            if (httpRequest.getRequestUri().hasUri("/login")) {
+                HttpResponse httpResponse = httpService.loginProcess(httpRequest);
+                String responseHeader = getResponseHeader(httpRequest.getRequestUri().getValue(), httpResponse);
+                outputStream.write(responseHeader.getBytes());
+                outputStream.write(httpResponse.getBody());
+                outputStream.flush();
+                return;
+            }
+            HttpResponse httpResponse = httpService.basicProcess(httpRequest);
+            String responseHeader = getResponseHeader(httpRequest.getRequestUri().getValue(), httpResponse);
             outputStream.write(responseHeader.getBytes());
-            outputStream.write(bytes);
+            outputStream.write(httpResponse.getBody());
             outputStream.flush();
 
         } catch (IOException | UncheckedServletException e) {
@@ -51,26 +56,26 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String getResponseHeader(final String requestUri, final byte[] bytes) {
+    private String getResponseHeader(final String requestUri, HttpResponse httpResponse) {
         String responseHeader = "";
         if (requestUri.endsWith(".css")) {
-            responseHeader = getHeader(bytes, "css");
+            responseHeader = getHeader(httpResponse, "css");
         }
         if (requestUri.endsWith(".html") || requestUri.equals("/")) {
-            responseHeader = getHeader(bytes, "html");
+            responseHeader = getHeader(httpResponse, "html");
         }
 
         if (requestUri.endsWith(".js")) {
-            responseHeader = getHeader(bytes, "js");
+            responseHeader = getHeader(httpResponse, "js");
         }
         return responseHeader;
     }
 
-    private String getHeader(final byte[] bytes, String type) {
+    private String getHeader(HttpResponse httpResponse, String type) {
         return String.join("\r\n",
-                "HTTP/1.1" + "200" + "OK",
+                "HTTP/1.1" + httpResponse.getHttpStatus().getCode() + httpResponse.getHttpStatus().getMessage(),
                 "Content-Type: text/" + type + ";charset=utf-8 ",
-                "Content-Length: " + bytes.length + " ",
+                "Content-Length: " + httpResponse.getBody().length + " ",
                 ""
         ) + "\r\n";
     }
