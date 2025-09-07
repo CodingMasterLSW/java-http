@@ -17,7 +17,8 @@ public class HttpService {
     }
 
     public HttpResponse loginProcess(HttpRequest httpRequest) {
-        if (httpRequest.getRequestUri().endWith(".html")) {
+        if (httpRequest.getRequestUri().endWith("/login")) {
+            httpRequest.modifyRequestUri(httpRequest.getRequestUri().convertHtmlFromUri());
             return new HttpResponse(httpRequest.calculateBytes(), HttpStatus.SUCCESS);
         }
         Map<String, String> queryParams = new HashMap<>();

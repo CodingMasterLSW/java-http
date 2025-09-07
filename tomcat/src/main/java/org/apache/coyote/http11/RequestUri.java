@@ -14,10 +14,8 @@ public class RequestUri {
         this.value = value;
     }
 
-    public RequestUri convertToHtmlUri() {
-        int index = this.value.indexOf("?");
-        String convertRequestUri = value.substring(0, index) + ".html";
-        return new RequestUri(convertRequestUri);
+    public RequestUri convertHtmlFromUri() {
+        return new RequestUri(this.value + ".html");
     }
 
     public String convertToQueryParams() {
