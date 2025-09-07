@@ -73,7 +73,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private String getHeader(HttpResponse httpResponse, String type) {
         return String.join("\r\n",
-                "HTTP/1.1" + httpResponse.getHttpStatus().getCode() + httpResponse.getHttpStatus().getMessage(),
+                "HTTP/1.1 " + httpResponse.getHttpStatus().getCode() + " " + httpResponse.getHttpStatus().getMessage(),
                 "Content-Type: text/" + type + ";charset=utf-8 ",
                 "Content-Length: " + httpResponse.getBody().length + " ",
                 ""

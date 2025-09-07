@@ -31,7 +31,7 @@ public class HttpService {
             return new HttpResponse(httpRequest.calculateBytes(), HttpStatus.FOUND);
         }
         httpRequest.modifyRequestUri(new RequestUri("/401.html"));
-        return new HttpResponse(httpRequest.calculateBytes(), HttpStatus.NOT_FOUND);
+        return new HttpResponse(httpRequest.calculateBytes(), HttpStatus.UNAUTHORIZED);
     }
 
     private boolean isExistUser(final Map<String, String> queryParams) {
