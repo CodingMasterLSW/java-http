@@ -2,6 +2,7 @@ package org.apache.coyote.http11.response;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public class HttpResponseHeader {
 
@@ -16,6 +17,10 @@ public class HttpResponseHeader {
         this.responseHeader = new LinkedHashMap<>();
         parseContentType(requestUri);
         putContentLength(body);
+    }
+
+    public void addSessionId() {
+        responseHeader.put("Set-Cookie", "JSESSIONID=" + UUID.randomUUID().toString());
     }
 
     private String parseContentType(final String requestUri) {

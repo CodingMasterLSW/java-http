@@ -6,17 +6,17 @@ import java.io.IOException;
 public class HttpRequest {
 
     private final HttpRequestLine httpRequestLine;
-    private final HttpRequestHeader requestHeaders;
+    private final HttpRequestHeader requestHeader;
     private final String requestBody;
 
     public HttpRequest(
             final HttpRequestLine httpRequestLine,
-            final HttpRequestHeader requestHeaders,
+            final HttpRequestHeader requestHeader,
             final BufferedReader br
     ) throws IOException {
         this.httpRequestLine = httpRequestLine;
-        this.requestHeaders = requestHeaders;
-        this.requestBody = parseRequestBody(requestHeaders, br);
+        this.requestHeader = requestHeader;
+        this.requestBody = parseRequestBody(requestHeader, br);
     }
 
     public HttpRequestLine getHttpRequestLine() {
@@ -27,8 +27,12 @@ public class HttpRequest {
         return requestBody;
     }
 
-    public HttpRequestHeader getRequestHeaders() {
-        return requestHeaders;
+    public boolean hasSessionId() {
+        return requestHeader.hasSessionId();
+    }
+
+    public HttpRequestHeader getRequestHeader() {
+        return requestHeader;
     }
 
     private String parseRequestBody(final HttpRequestHeader requestHeaders, final BufferedReader br)

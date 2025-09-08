@@ -117,6 +117,10 @@ public class HttpService {
                         httpResponseBody.getValue()
                 );
 
+                if (!httpRequest.hasSessionId()) {
+                    httpResponseHeader.addSessionId();
+                }
+
                 return new HttpResponse(httpResponseBody, HttpStatus.FOUND, httpResponseHeader);
             }
 

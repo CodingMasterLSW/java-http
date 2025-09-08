@@ -15,6 +15,10 @@ public class HttpRequestHeader {
         return httpRequestHeader.getOrDefault("Content-Length", "0");
     }
 
+    public boolean hasSessionId() {
+        return httpRequestHeader.containsKey("JSESSIONID");
+    }
+
     public Map<String, String> getHttpRequestHeaders() {
         return Collections.unmodifiableMap(httpRequestHeader);
     }
