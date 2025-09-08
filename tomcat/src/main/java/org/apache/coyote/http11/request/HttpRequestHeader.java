@@ -1,7 +1,8 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import java.util.Collections;
 import java.util.Map;
+import org.apache.coyote.http11.Cookie;
 
 public class HttpRequestHeader {
 
