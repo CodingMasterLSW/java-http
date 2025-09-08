@@ -44,6 +44,7 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequest httpRequest = new HttpRequest(httpRequestLine, httpRequestHeader, br);
 
             if (httpRequestLine.getRequestUri().hasUri("/login")) {
+                System.out.println("requestHeader = " + httpRequestHeader.getHttpRequestHeaders().toString());
                 HttpResponse httpResponse = httpService.loginProcess(httpRequest);
                 final HttpResponseHeader responseHeader = httpResponse.getResponseHeader();
 

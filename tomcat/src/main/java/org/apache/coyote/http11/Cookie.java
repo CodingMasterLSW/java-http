@@ -5,14 +5,23 @@ import java.util.Map;
 
 public class Cookie {
 
-    private final Map<String, String> cookie = new HashMap<>();
+    private static final Map<String, String> cookie = new HashMap<>();
 
-    public void addAllCookie(String value) {
-        //TODO : cookie 값 확인하고 파싱 후 저장하기
+    private Cookie() {}
+
+    public static void addAllCookie(String value) {
+        if (value == null) {
+            return;
+        }
+        
+        final String[] split = value.split(";");
+        for (String s : split) {
+            String[] keyValue = s.trim().split("=");
+            addCookie(keyValue[0], keyValue[1]);
+        }
     }
 
-    public void addCookie(String key, String value) {
+    private static void addCookie(String key, String value) {
         cookie.put(key, value);
     }
-
 }

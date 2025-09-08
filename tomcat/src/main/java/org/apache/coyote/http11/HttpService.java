@@ -97,6 +97,8 @@ public class HttpService {
         if (httpRequestLine.getRequestUri().endWith("login") &&
                 httpRequestLine.getMethod().equals("POST")
         ) {
+            final String value = httpRequest.getRequestHeader().getHttpRequestHeaders().get("Cookie");
+            Cookie.addAllCookie(value);
             final String requestBody = httpRequest.getRequestBody();
 
             Map<String, String> requestValues = new HashMap<>();
