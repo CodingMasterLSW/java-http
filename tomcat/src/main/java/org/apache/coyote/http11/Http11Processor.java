@@ -19,7 +19,8 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final HttpService httpService = new HttpService();
+    private final SessionManager sessionManager = new SessionManager();
+    private final HttpService httpService = new HttpService(sessionManager);
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
@@ -44,7 +45,6 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequest httpRequest = new HttpRequest(httpRequestLine, httpRequestHeader, br);
 
             if (httpRequestLine.getRequestUri().hasUri("/login")) {
-                System.out.println("requestHeader = " + httpRequestHeader.getHttpRequestHeaders().toString());
                 HttpResponse httpResponse = httpService.loginProcess(httpRequest);
                 final HttpResponseHeader responseHeader = httpResponse.getResponseHeader();
 

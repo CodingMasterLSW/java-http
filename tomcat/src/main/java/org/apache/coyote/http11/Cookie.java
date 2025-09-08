@@ -13,15 +13,26 @@ public class Cookie {
         if (value == null) {
             return;
         }
-        
+
         final String[] split = value.split(";");
         for (String s : split) {
             String[] keyValue = s.trim().split("=");
+            if (keyValue.length != 2) {
+                return;
+            }
             addCookie(keyValue[0], keyValue[1]);
         }
     }
 
-    private static void addCookie(String key, String value) {
+    public static String getCookieValue(String value) {
+        return cookie.get(value);
+    }
+
+    public static boolean hasCookieValue(String value) {
+        return cookie.containsKey(value);
+    }
+
+    public static void addCookie(String key, String value) {
         cookie.put(key, value);
     }
 }

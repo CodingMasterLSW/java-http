@@ -16,7 +16,17 @@ public class HttpRequestHeader {
     }
 
     public boolean hasSessionId() {
-        return httpRequestHeader.containsKey("JSESSIONID");
+        if (httpRequestHeader.containsKey("Cookie")) {
+            return Cookie.hasCookieValue("JSESSIONID");
+        }
+        return false;
+    }
+
+    public String getSessionId() {
+        if (httpRequestHeader.containsKey("Cookie")) {
+            return Cookie.getCookieValue("JSESSIONID");
+        }
+        return null;
     }
 
     public Map<String, String> getHttpRequestHeaders() {

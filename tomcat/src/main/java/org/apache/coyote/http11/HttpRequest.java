@@ -31,6 +31,10 @@ public class HttpRequest {
         return requestHeader.hasSessionId();
     }
 
+    public String getSessionId() {
+        return requestHeader.getSessionId();
+    }
+
     public HttpRequestHeader getRequestHeader() {
         return requestHeader;
     }
