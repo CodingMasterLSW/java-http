@@ -6,14 +6,26 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpResponseBody;
+import org.apache.coyote.http11.response.HttpResponseHeader;
 
 public class HttpService {
 
     public HttpResponse basicProcess(HttpRequestLine httpRequestLine) {
+
+        final HttpResponseBody httpResponseBody = new HttpResponseBody(
+                httpRequestLine.getRequestUri().getValue());
+        final HttpResponseHeader httpResponseHeader = new HttpResponseHeader(
+                httpRequestLine.getRequestUri().getValue(),
+                httpResponseBody.getValue()
+        );
+
         if (!httpRequestLine.getRequestUri().isExistFile()) {
-            return new HttpResponse(httpRequestLine.calculateBytes(), HttpStatus.NOT_FOUND);
+            return new HttpResponse(httpResponseBody, HttpStatus.NOT_FOUND, httpResponseHeader);
         }
-        return new HttpResponse(httpRequestLine.calculateBytes(), HttpStatus.SUCCESS);
+
+        return new HttpResponse(httpResponseBody, HttpStatus.SUCCESS, httpResponseHeader);
     }
 
     public HttpResponse registerProcess(HttpRequest httpRequest) {
@@ -21,7 +33,15 @@ public class HttpService {
         if (httpRequestLine.getRequestUri().endWith("/register") &&
                 httpRequestLine.getMethod().equals("GET")) {
             httpRequestLine.modifyRequestUri(httpRequestLine.getRequestUri().convertHtmlFromUri());
-            return new HttpResponse(httpRequestLine.calculateBytes(), HttpStatus.SUCCESS);
+            final HttpResponseBody httpResponseBody = new HttpResponseBody(
+                    httpRequestLine.getRequestUri().getValue());
+
+            final HttpResponseHeader httpResponseHeader = new HttpResponseHeader(
+                    httpRequestLine.getRequestUri().getValue(),
+                    httpResponseBody.getValue()
+            );
+
+            return new HttpResponse(httpResponseBody, HttpStatus.SUCCESS, httpResponseHeader);
         }
 
         if (httpRequestLine.getRequestUri().endWith("/register") &&
@@ -44,7 +64,16 @@ public class HttpService {
 
             InMemoryUserRepository.save(user);
             httpRequestLine.modifyRequestUri(new RequestUri("/index.html"));
-            return new HttpResponse(httpRequestLine.calculateBytes(), HttpStatus.SUCCESS);
+
+            final HttpResponseBody httpResponseBody = new HttpResponseBody(
+                    httpRequestLine.getRequestUri().getValue());
+
+            final HttpResponseHeader httpResponseHeader = new HttpResponseHeader(
+                    httpRequestLine.getRequestUri().getValue(),
+                    httpResponseBody.getValue()
+            );
+
+            return new HttpResponse(httpResponseBody, HttpStatus.SUCCESS, httpResponseHeader);
         }
         return null;
     }
@@ -52,9 +81,17 @@ public class HttpService {
     public HttpResponse loginProcess(HttpRequest httpRequest) {
         final HttpRequestLine httpRequestLine = httpRequest.getHttpRequestLine();
         if (httpRequestLine.getRequestUri().endWith("/login") &&
-                httpRequestLine.getMethod().equals("GET")) {
-            httpRequestLine.modifyRequestUri(httpRequestLine.getRequestUri().convertHtmlFromUri());
-            return new HttpResponse(httpRequestLine.calculateBytes(), HttpStatus.SUCCESS);
+                httpRequestLine.getMethod().equals("GET")
+        ) {
+            final HttpResponseBody httpResponseBody = new HttpResponseBody(
+                    httpRequestLine.getRequestUri().getValue() +".html");
+
+            final HttpResponseHeader httpResponseHeader = new HttpResponseHeader(
+                    httpRequestLine.getRequestUri().getValue() + ".html",
+                    httpResponseBody.getValue()
+            );
+
+            return new HttpResponse(httpResponseBody, HttpStatus.SUCCESS, httpResponseHeader);
         }
 
         if (httpRequestLine.getRequestUri().endWith("login") &&
@@ -71,10 +108,27 @@ public class HttpService {
 
             if (isExistUser(requestValues)) {
                 httpRequestLine.modifyRequestUri(new RequestUri("/index.html"));
-                return new HttpResponse(httpRequestLine.calculateBytes(), HttpStatus.FOUND);
+
+                final HttpResponseBody httpResponseBody = new HttpResponseBody(
+                        "/index.html");
+
+                final HttpResponseHeader httpResponseHeader = new HttpResponseHeader(
+                       "/index.html",
+                        httpResponseBody.getValue()
+                );
+
+                return new HttpResponse(httpResponseBody, HttpStatus.FOUND, httpResponseHeader);
             }
-            httpRequestLine.modifyRequestUri(new RequestUri("/401.html"));
-            return new HttpResponse(httpRequestLine.calculateBytes(), HttpStatus.UNAUTHORIZED);
+
+            final HttpResponseBody httpResponseBody = new HttpResponseBody(
+                    "/401.html");
+
+            final HttpResponseHeader httpResponseHeader = new HttpResponseHeader(
+                    "/401.html",
+                    httpResponseBody.getValue()
+            );
+
+            return new HttpResponse(httpResponseBody, HttpStatus.UNAUTHORIZED, httpResponseHeader);
 
         }
         return null;

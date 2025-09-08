@@ -6,6 +6,8 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpResponseHeader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,35 +39,36 @@ public class Http11Processor implements Runnable, Processor {
             BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
             String firstLine = br.readLine();
 
-            final HttpRequestHeaders httpRequestHeaders = parseHeaders(br);
+            final HttpRequestHeader httpRequestHeader = parseHeaders(br);
             HttpRequestLine httpRequestLine = HttpRequestLine.createFrom(firstLine);
-            HttpRequest httpRequest = new HttpRequest(httpRequestLine, httpRequestHeaders, br);
+            HttpRequest httpRequest = new HttpRequest(httpRequestLine, httpRequestHeader, br);
 
             if (httpRequestLine.getRequestUri().hasUri("/login")) {
                 HttpResponse httpResponse = httpService.loginProcess(httpRequest);
-                String responseHeader = getResponseHeader(httpRequestLine.getRequestUri().getValue(),
-                        httpResponse);
-                outputStream.write(responseHeader.getBytes());
-                outputStream.write(httpResponse.getBody());
+                final HttpResponseHeader responseHeader = httpResponse.getResponseHeader();
+
+                outputStream.write((httpResponse.getResponseLine() + " \r\n").getBytes());
+                outputStream.write(responseHeader.parseAndGetAllHeader().getBytes());
+                outputStream.write(httpResponse.getBodyValue());
                 outputStream.flush();
                 return;
             }
 
             if (httpRequestLine.getRequestUri().hasUri("/register")) {
                 HttpResponse httpResponse = httpService.registerProcess(httpRequest);
-                String responseHeader = getResponseHeader(httpRequestLine.getRequestUri().getValue(),
-                        httpResponse);
-                outputStream.write(responseHeader.getBytes());
-                outputStream.write(httpResponse.getBody());
-                outputStream.flush();
+                final HttpResponseHeader responseHeader = httpResponse.getResponseHeader();
+                outputStream.write((httpResponse.getResponseLine() + " \r\n").getBytes());
+                outputStream.write(responseHeader.parseAndGetAllHeader().getBytes());
+                outputStream.write(httpResponse.getBodyValue());
                 return;
             }
 
             HttpResponse httpResponse = httpService.basicProcess(httpRequestLine);
-            String responseHeader = getResponseHeader(httpRequestLine.getRequestUri().getValue(),
-                    httpResponse);
-            outputStream.write(responseHeader.getBytes());
-            outputStream.write(httpResponse.getBody());
+            final HttpResponseHeader responseHeader = httpResponse.getResponseHeader();
+
+            outputStream.write((httpResponse.getResponseLine() + " \r\n").getBytes());
+            outputStream.write(responseHeader.parseAndGetAllHeader().getBytes());
+            outputStream.write(httpResponse.getBodyValue());
             outputStream.flush();
 
         } catch (IOException | UncheckedServletException e) {
@@ -74,7 +77,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
 
-    private HttpRequestHeaders parseHeaders(final BufferedReader br) throws IOException {
+    private HttpRequestHeader parseHeaders(final BufferedReader br) throws IOException {
         Map<String, String> headers = new HashMap<>();
         String headerLine;
         while ((headerLine = br.readLine()) != null && !headerLine.isEmpty()) {
@@ -83,31 +86,6 @@ public class Http11Processor implements Runnable, Processor {
             String value = headerLine.substring(idx + 1).trim();
             headers.put(key, value);
         }
-        return new HttpRequestHeaders(headers);
-    }
-
-    private String getResponseHeader(final String requestUri, HttpResponse httpResponse) {
-        String responseHeader = "";
-        if (requestUri.endsWith(".css")) {
-            responseHeader = getHeader(httpResponse, "css");
-        }
-        if (requestUri.endsWith(".html") || requestUri.equals("/")) {
-            responseHeader = getHeader(httpResponse, "html");
-        }
-
-        if (requestUri.endsWith(".js")) {
-            responseHeader = getHeader(httpResponse, "js");
-        }
-        return responseHeader;
-    }
-
-    private String getHeader(HttpResponse httpResponse, String type) {
-        return String.join("\r\n",
-                "HTTP/1.1 " + httpResponse.getHttpStatus().getCode() + " "
-                        + httpResponse.getHttpStatus().getMessage(),
-                "Content-Type: text/" + type + ";charset=utf-8 ",
-                "Content-Length: " + httpResponse.getBody().length + " ",
-                ""
-        ) + "\r\n";
+        return new HttpRequestHeader(headers);
     }
 }

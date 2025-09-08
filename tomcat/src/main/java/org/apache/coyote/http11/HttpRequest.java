@@ -6,12 +6,12 @@ import java.io.IOException;
 public class HttpRequest {
 
     private final HttpRequestLine httpRequestLine;
-    private final HttpRequestHeaders requestHeaders;
-    private String requestBody;
+    private final HttpRequestHeader requestHeaders;
+    private final String requestBody;
 
     public HttpRequest(
             final HttpRequestLine httpRequestLine,
-            final HttpRequestHeaders requestHeaders,
+            final HttpRequestHeader requestHeaders,
             final BufferedReader br
     ) throws IOException {
         this.httpRequestLine = httpRequestLine;
@@ -27,11 +27,11 @@ public class HttpRequest {
         return requestBody;
     }
 
-    public HttpRequestHeaders getRequestHeaders() {
+    public HttpRequestHeader getRequestHeaders() {
         return requestHeaders;
     }
 
-    private String parseRequestBody(final HttpRequestHeaders requestHeaders, final BufferedReader br)
+    private String parseRequestBody(final HttpRequestHeader requestHeaders, final BufferedReader br)
             throws IOException {
         int contentLength = Integer.parseInt(requestHeaders.getContentLength());
         if (contentLength > 0) {
