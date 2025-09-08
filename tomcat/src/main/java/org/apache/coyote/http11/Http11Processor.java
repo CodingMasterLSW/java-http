@@ -3,6 +3,8 @@ package org.apache.coyote.http11;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,30 +35,35 @@ public class Http11Processor implements Runnable, Processor {
                 final var outputStream = connection.getOutputStream()) {
 
             BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
-            String line = br.readLine();
+            String firstLine = br.readLine();
 
-            HttpRequest httpRequest = HttpRequest.createFrom(line);
+            final HttpRequestHeaders httpRequestHeaders = parseHeaders(br);
+            HttpRequestLine httpRequestLine = HttpRequestLine.createFrom(firstLine);
+            HttpRequest httpRequest = new HttpRequest(httpRequestLine, httpRequestHeaders, br);
 
-            if (httpRequest.getRequestUri().hasUri("/login")) {
+            if (httpRequestLine.getRequestUri().hasUri("/login")) {
                 HttpResponse httpResponse = httpService.loginProcess(httpRequest);
-                String responseHeader = getResponseHeader(httpRequest.getRequestUri().getValue(), httpResponse);
+                String responseHeader = getResponseHeader(httpRequestLine.getRequestUri().getValue(),
+                        httpResponse);
                 outputStream.write(responseHeader.getBytes());
                 outputStream.write(httpResponse.getBody());
                 outputStream.flush();
                 return;
             }
 
-            if (httpRequest.getRequestUri().hasUri("/register")) {
+            if (httpRequestLine.getRequestUri().hasUri("/register")) {
                 HttpResponse httpResponse = httpService.registerProcess(httpRequest);
-                String responseHeader = getResponseHeader(httpRequest.getRequestUri().getValue(), httpResponse);
+                String responseHeader = getResponseHeader(httpRequestLine.getRequestUri().getValue(),
+                        httpResponse);
                 outputStream.write(responseHeader.getBytes());
                 outputStream.write(httpResponse.getBody());
                 outputStream.flush();
                 return;
             }
 
-            HttpResponse httpResponse = httpService.basicProcess(httpRequest);
-            String responseHeader = getResponseHeader(httpRequest.getRequestUri().getValue(), httpResponse);
+            HttpResponse httpResponse = httpService.basicProcess(httpRequestLine);
+            String responseHeader = getResponseHeader(httpRequestLine.getRequestUri().getValue(),
+                    httpResponse);
             outputStream.write(responseHeader.getBytes());
             outputStream.write(httpResponse.getBody());
             outputStream.flush();
@@ -64,6 +71,19 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+
+    private HttpRequestHeaders parseHeaders(final BufferedReader br) throws IOException {
+        Map<String, String> headers = new HashMap<>();
+        String headerLine;
+        while ((headerLine = br.readLine()) != null && !headerLine.isEmpty()) {
+            int idx = headerLine.indexOf(":");
+            String key = headerLine.substring(0, idx).trim();
+            String value = headerLine.substring(idx + 1).trim();
+            headers.put(key, value);
+        }
+        return new HttpRequestHeaders(headers);
     }
 
     private String getResponseHeader(final String requestUri, HttpResponse httpResponse) {
@@ -83,7 +103,8 @@ public class Http11Processor implements Runnable, Processor {
 
     private String getHeader(HttpResponse httpResponse, String type) {
         return String.join("\r\n",
-                "HTTP/1.1 " + httpResponse.getHttpStatus().getCode() + " " + httpResponse.getHttpStatus().getMessage(),
+                "HTTP/1.1 " + httpResponse.getHttpStatus().getCode() + " "
+                        + httpResponse.getHttpStatus().getMessage(),
                 "Content-Type: text/" + type + ";charset=utf-8 ",
                 "Content-Length: " + httpResponse.getBody().length + " ",
                 ""

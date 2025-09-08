@@ -1,40 +1,44 @@
 package org.apache.coyote.http11;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+
 public class HttpRequest {
 
-    private final String method;
-    private RequestUri requestUri;
-    private final String version;
+    private final HttpRequestLine httpRequestLine;
+    private final HttpRequestHeaders requestHeaders;
+    private String requestBody;
 
-    public static HttpRequest createFrom(String line) {
-        return new HttpRequest(line);
+    public HttpRequest(
+            final HttpRequestLine httpRequestLine,
+            final HttpRequestHeaders requestHeaders,
+            final BufferedReader br
+    ) throws IOException {
+        this.httpRequestLine = httpRequestLine;
+        this.requestHeaders = requestHeaders;
+        this.requestBody = parseRequestBody(requestHeaders, br);
     }
 
-    private HttpRequest(String line) {
-        final String[] lines = line.split(" ");
-        this.method = lines[0];
-        this.requestUri = new RequestUri(lines[1]);
-        this.version = lines[2];
+    public HttpRequestLine getHttpRequestLine() {
+        return httpRequestLine;
     }
 
-    public void modifyRequestUri(RequestUri requestUri) {
-        this.requestUri = requestUri;
+    public String getRequestBody() {
+        return requestBody;
     }
 
-    public String getMethod() {
-        return method;
+    public HttpRequestHeaders getRequestHeaders() {
+        return requestHeaders;
     }
 
-    public RequestUri getRequestUri() {
-        return requestUri;
+    private String parseRequestBody(final HttpRequestHeaders requestHeaders, final BufferedReader br)
+            throws IOException {
+        int contentLength = Integer.parseInt(requestHeaders.getContentLength());
+        if (contentLength > 0) {
+            char[] buffer = new char[contentLength];
+            br.read(buffer, 0, contentLength);
+            return new String(buffer);
+        }
+        return null;
     }
-
-    public String getVersion() {
-        return version;
-    }
-
-    public byte[] calculateBytes() {
-        return this.requestUri.calculateBytes();
-    }
-
 }

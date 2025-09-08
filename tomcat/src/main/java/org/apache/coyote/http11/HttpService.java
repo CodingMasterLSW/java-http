@@ -9,40 +9,75 @@ import java.util.Map;
 
 public class HttpService {
 
-    public HttpResponse basicProcess(HttpRequest httpRequest) {
-        if (!httpRequest.getRequestUri().isExistFile()) {
-            return new HttpResponse(httpRequest.calculateBytes(), HttpStatus.NOT_FOUND);
+    public HttpResponse basicProcess(HttpRequestLine httpRequestLine) {
+        if (!httpRequestLine.getRequestUri().isExistFile()) {
+            return new HttpResponse(httpRequestLine.calculateBytes(), HttpStatus.NOT_FOUND);
         }
-        return new HttpResponse(httpRequest.calculateBytes(), HttpStatus.SUCCESS);
+        return new HttpResponse(httpRequestLine.calculateBytes(), HttpStatus.SUCCESS);
     }
 
     public HttpResponse registerProcess(HttpRequest httpRequest) {
-        if (httpRequest.getRequestUri().endWith("/register")) {
-            httpRequest.modifyRequestUri(httpRequest.getRequestUri().convertHtmlFromUri());
-            return new HttpResponse(httpRequest.calculateBytes(), HttpStatus.SUCCESS);
+        final HttpRequestLine httpRequestLine = httpRequest.getHttpRequestLine();
+        if (httpRequestLine.getRequestUri().endWith("/register") &&
+                httpRequestLine.getMethod().equals("GET")) {
+            httpRequestLine.modifyRequestUri(httpRequestLine.getRequestUri().convertHtmlFromUri());
+            return new HttpResponse(httpRequestLine.calculateBytes(), HttpStatus.SUCCESS);
         }
-        // TODO : 회원가입을 logic 작성
-        return new HttpResponse(httpRequest.calculateBytes(), HttpStatus.SUCCESS);
 
+        if (httpRequestLine.getRequestUri().endWith("/register") &&
+                httpRequestLine.getMethod().equals("POST")) {
+
+            final String requestBody = httpRequest.getRequestBody();
+
+            Map<String, String> requestValues = new HashMap<>();
+            final String[] firstSplit = requestBody.split("&");
+            for (String s : firstSplit) {
+                final String[] keyAndValue = s.split("=");
+                requestValues.put(keyAndValue[0], keyAndValue[1]);
+            }
+
+            User user = new User(
+                    requestValues.get("account"),
+                    requestValues.get("password"),
+                    requestValues.get("email")
+            );
+
+            InMemoryUserRepository.save(user);
+            httpRequestLine.modifyRequestUri(new RequestUri("/index.html"));
+            return new HttpResponse(httpRequestLine.calculateBytes(), HttpStatus.SUCCESS);
+        }
+        return null;
     }
 
     public HttpResponse loginProcess(HttpRequest httpRequest) {
-        if (httpRequest.getRequestUri().endWith("/login")) {
-            httpRequest.modifyRequestUri(httpRequest.getRequestUri().convertHtmlFromUri());
-            return new HttpResponse(httpRequest.calculateBytes(), HttpStatus.SUCCESS);
+        final HttpRequestLine httpRequestLine = httpRequest.getHttpRequestLine();
+        if (httpRequestLine.getRequestUri().endWith("/login") &&
+                httpRequestLine.getMethod().equals("GET")) {
+            httpRequestLine.modifyRequestUri(httpRequestLine.getRequestUri().convertHtmlFromUri());
+            return new HttpResponse(httpRequestLine.calculateBytes(), HttpStatus.SUCCESS);
         }
-        Map<String, String> queryParams = new HashMap<>();
-        String queryParam = httpRequest.getRequestUri().convertToQueryParams();
-        String[] split = queryParam.split("[=&]");
-        queryParams.put(split[0], split[1]);
-        queryParams.put(split[2], split[3]);
 
-        if (isExistUser(queryParams)) {
-            httpRequest.modifyRequestUri(new RequestUri("/index.html"));
-            return new HttpResponse(httpRequest.calculateBytes(), HttpStatus.FOUND);
+        if (httpRequestLine.getRequestUri().endWith("login") &&
+                httpRequestLine.getMethod().equals("POST")
+        ) {
+            final String requestBody = httpRequest.getRequestBody();
+
+            Map<String, String> requestValues = new HashMap<>();
+            final String[] firstSplit = requestBody.split("&");
+            for (String s : firstSplit) {
+                final String[] keyAndValue = s.split("=");
+                requestValues.put(keyAndValue[0], keyAndValue[1]);
+            }
+
+            if (isExistUser(requestValues)) {
+                httpRequestLine.modifyRequestUri(new RequestUri("/index.html"));
+                return new HttpResponse(httpRequestLine.calculateBytes(), HttpStatus.FOUND);
+            }
+            httpRequestLine.modifyRequestUri(new RequestUri("/401.html"));
+            return new HttpResponse(httpRequestLine.calculateBytes(), HttpStatus.UNAUTHORIZED);
+
         }
-        httpRequest.modifyRequestUri(new RequestUri("/401.html"));
-        return new HttpResponse(httpRequest.calculateBytes(), HttpStatus.UNAUTHORIZED);
+        return null;
     }
 
     private boolean isExistUser(final Map<String, String> queryParams) {
