@@ -135,12 +135,14 @@ public class HttpService {
             if (isExistUser(requestValues)) {
 
                 final HttpResponseBody httpResponseBody = new HttpResponseBody(
-                        "/index.html");
+                        httpRequestLine.getRequestUri().getValue() + ".html");
 
                 final HttpResponseHeader httpResponseHeader = new HttpResponseHeader(
-                        "/index.html",
+                        httpRequestLine.getRequestUri().getValue() + ".html",
                         httpResponseBody.getValue()
                 );
+
+                httpResponseHeader.addHeader("Location", "/index.html");
 
                 if (!httpRequest.hasSessionId()) {
                     httpResponseHeader.addSessionId();

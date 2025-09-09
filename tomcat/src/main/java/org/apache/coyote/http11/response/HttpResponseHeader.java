@@ -23,6 +23,10 @@ public class HttpResponseHeader {
         responseHeader.put("Set-Cookie", "JSESSIONID=" + UUID.randomUUID().toString());
     }
 
+    public void addHeader(String key, String value) {
+        responseHeader.put(key, value);
+    }
+
     private void parseContentType(final String requestUri) {
         String contentType = "Content-Type";
 
