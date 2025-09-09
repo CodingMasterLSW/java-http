@@ -9,6 +9,14 @@ public class SessionManager implements Manager {
 
     private static final Map<String, Session> SESSIONS = new HashMap<>();
 
+    private static final SessionManager INSTANCE = new SessionManager();
+
+    private SessionManager() {}
+
+    public static SessionManager getInstance() {
+        return INSTANCE;
+    }
+
     @Override
     public void add(final Session session) {
         SESSIONS.put(session.getId(), session);
