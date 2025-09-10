@@ -10,7 +10,6 @@ import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestHeader;
 import org.apache.coyote.http11.request.HttpRequestLine;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.HttpResponseHeader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,8 +21,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final SessionManager sessionManager = SessionManager.getInstance();
-    private final HttpService httpService = new HttpService(sessionManager);
+    private final DispatcherServlet dispatcherServlet = new DispatcherServlet();
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
@@ -47,33 +45,8 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequestLine httpRequestLine = HttpRequestLine.createFrom(firstLine);
             HttpRequest httpRequest = new HttpRequest(httpRequestLine, httpRequestHeader, br);
 
-            if (httpRequestLine.getRequestUri().hasUri("/login")) {
-                HttpResponse httpResponse = httpService.loginProcess(httpRequest);
-                final HttpResponseHeader responseHeader = httpResponse.getResponseHeader();
-
-                outputStream.write((httpResponse.getResponseLine() + " \r\n").getBytes());
-                outputStream.write(responseHeader.parseAndGetAllHeader().getBytes());
-                outputStream.write(httpResponse.getBodyValue());
-                outputStream.flush();
-                return;
-            }
-
-            if (httpRequestLine.getRequestUri().hasUri("/register")) {
-                HttpResponse httpResponse = httpService.registerProcess(httpRequest);
-                final HttpResponseHeader responseHeader = httpResponse.getResponseHeader();
-                outputStream.write((httpResponse.getResponseLine() + " \r\n").getBytes());
-                outputStream.write(responseHeader.parseAndGetAllHeader().getBytes());
-                outputStream.write(httpResponse.getBodyValue());
-                return;
-            }
-
-            HttpResponse httpResponse = httpService.basicProcess(httpRequestLine);
-            final HttpResponseHeader responseHeader = httpResponse.getResponseHeader();
-
-            outputStream.write((httpResponse.getResponseLine() + " \r\n").getBytes());
-            outputStream.write(responseHeader.parseAndGetAllHeader().getBytes());
-            outputStream.write(httpResponse.getBodyValue());
-            outputStream.flush();
+            final HttpResponse response = dispatcherServlet.service(httpRequest);
+            response.write(outputStream);
 
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);

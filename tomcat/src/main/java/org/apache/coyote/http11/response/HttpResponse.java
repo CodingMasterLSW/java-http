@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.response;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import org.apache.coyote.http11.HttpStatus;
 
 public class HttpResponse {
@@ -18,23 +20,18 @@ public class HttpResponse {
         this.responseHeader = responseHeader;
     }
 
-    public byte[] getBodyValue() {
-        return responseBody.getValue();
-    }
-
-    public HttpStatus getHttpStatus() {
-        return httpStatus;
-    }
-
-    public HttpResponseBody getResponseBody() {
-        return responseBody;
+    public void write(final OutputStream outputStream) throws IOException {
+        outputStream.write((getResponseLine() + " \r\n").getBytes());
+        outputStream.write(responseHeader.parseAndGetAllHeader().getBytes());
+        outputStream.write(responseBody.getValue());
+        outputStream.flush();
     }
 
     public HttpResponseHeader getResponseHeader() {
         return responseHeader;
     }
 
-    public String getResponseLine() {
+    private String getResponseLine() {
         return "HTTP/1.1" + " " + httpStatus.getCode() + " " + httpStatus.getMessage();
     }
 }

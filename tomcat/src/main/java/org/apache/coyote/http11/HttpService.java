@@ -22,7 +22,7 @@ public class HttpService {
         this.sessionManager = sessionManager;
     }
 
-    public HttpResponse basicProcess(HttpRequestLine httpRequestLine) {
+    public HttpResponse indexProcess(HttpRequestLine httpRequestLine) {
 
         final HttpResponseBody httpResponseBody = new HttpResponseBody(
                 httpRequestLine.getRequestUri().getValue());
@@ -38,76 +38,88 @@ public class HttpService {
         return new HttpResponse(httpResponseBody, HttpStatus.SUCCESS, httpResponseHeader);
     }
 
-    public HttpResponse registerProcess(HttpRequest httpRequest) {
+    public HttpResponse getRegisterPage(HttpRequest httpRequest) {
         final HttpRequestLine httpRequestLine = httpRequest.getHttpRequestLine();
-        if (httpRequestLine.getRequestUri().endWith("/register") &&
-                httpRequestLine.getMethod().equals("GET")) {
-            httpRequestLine.modifyRequestUri(httpRequestLine.getRequestUri().convertHtmlFromUri());
-            final HttpResponseBody httpResponseBody = new HttpResponseBody(
-                    httpRequestLine.getRequestUri().getValue());
+        httpRequestLine.modifyRequestUri(httpRequestLine.getRequestUri().convertHtmlFromUri());
+        final HttpResponseBody httpResponseBody = new HttpResponseBody(
+                httpRequestLine.getRequestUri().getValue());
 
-            final HttpResponseHeader httpResponseHeader = new HttpResponseHeader(
-                    httpRequestLine.getRequestUri().getValue(),
-                    httpResponseBody.getValue()
-            );
-
-            return new HttpResponse(httpResponseBody, HttpStatus.SUCCESS, httpResponseHeader);
-        }
-
-        if (httpRequestLine.getRequestUri().endWith("/register") &&
-                httpRequestLine.getMethod().equals("POST")) {
-
-            final String requestBody = httpRequest.getRequestBody();
-
-            Map<String, String> requestValues = new HashMap<>();
-            final String[] firstSplit = requestBody.split("&");
-            for (String s : firstSplit) {
-                final String[] keyAndValue = s.split("=");
-                requestValues.put(keyAndValue[0], keyAndValue[1]);
-            }
-
-            User user = new User(
-                    requestValues.get("account"),
-                    requestValues.get("password"),
-                    requestValues.get("email")
-            );
-
-            InMemoryUserRepository.save(user);
-
-            final HttpResponseBody httpResponseBody = new HttpResponseBody(
-                    httpRequestLine.getRequestUri().getValue());
-
-            final HttpResponseHeader httpResponseHeader = new HttpResponseHeader(
-                    httpRequestLine.getRequestUri().getValue(),
-                    httpResponseBody.getValue()
-            );
-
-            return new HttpResponse(httpResponseBody, HttpStatus.SUCCESS, httpResponseHeader);
-        }
-        return null;
+        final HttpResponseHeader httpResponseHeader = new HttpResponseHeader(
+                httpRequestLine.getRequestUri().getValue(),
+                httpResponseBody.getValue()
+        );
+        return new HttpResponse(httpResponseBody, HttpStatus.SUCCESS, httpResponseHeader);
     }
 
-    public HttpResponse loginProcess(HttpRequest httpRequest) {
+    public HttpResponse saveRegister(HttpRequest httpRequest) {
         final HttpRequestLine httpRequestLine = httpRequest.getHttpRequestLine();
-        if (httpRequestLine.getRequestUri().endWith("/login") &&
-                httpRequestLine.getMethod().equals("GET")
-        ) {
+        final String requestBody = httpRequest.getRequestBody();
+        Map<String, String> requestValues = new HashMap<>();
+        final String[] firstSplit = requestBody.split("&");
+        for (String s : firstSplit) {
+            final String[] keyAndValue = s.split("=");
+            requestValues.put(keyAndValue[0], keyAndValue[1]);
+        }
 
-            if (httpRequest.hasSessionId()) {
-                final String sessionId = httpRequest.getSessionId();
-                final Optional<Session> session = sessionManager.findSession(sessionId);
-                if (session.isPresent()) {
-                    final HttpResponseBody httpResponseBody = new HttpResponseBody(
-                            "/index.html");
+        User user = new User(
+                requestValues.get("account"),
+                requestValues.get("password"),
+                requestValues.get("email")
+        );
 
-                    final HttpResponseHeader httpResponseHeader = new HttpResponseHeader(
-                            "/index.html",
-                            httpResponseBody.getValue()
-                    );
-                    return new HttpResponse(httpResponseBody, HttpStatus.SUCCESS,
-                            httpResponseHeader);
-                }
+        InMemoryUserRepository.save(user);
+
+        final HttpResponseBody httpResponseBody = new HttpResponseBody(
+                httpRequestLine.getRequestUri().getValue());
+
+        final HttpResponseHeader httpResponseHeader = new HttpResponseHeader(
+                httpRequestLine.getRequestUri().getValue(),
+                httpResponseBody.getValue()
+        );
+        return new HttpResponse(httpResponseBody, HttpStatus.SUCCESS, httpResponseHeader);
+    }
+
+    public HttpResponse getLoginPage(HttpRequest httpRequest) {
+        final HttpRequestLine httpRequestLine = httpRequest.getHttpRequestLine();
+        if (httpRequest.hasSessionId()) {
+            final String sessionId = httpRequest.getSessionId();
+            final Optional<Session> session = sessionManager.findSession(sessionId);
+            if (session.isPresent()) {
+                final HttpResponseBody httpResponseBody = new HttpResponseBody(
+                        "/index.html");
+
+                final HttpResponseHeader httpResponseHeader = new HttpResponseHeader(
+                        "/index.html",
+                        httpResponseBody.getValue()
+                );
+                return new HttpResponse(httpResponseBody, HttpStatus.SUCCESS,
+                        httpResponseHeader);
             }
+        }
+
+        final HttpResponseBody httpResponseBody = new HttpResponseBody(
+                httpRequestLine.getRequestUri().getValue() + ".html");
+
+        final HttpResponseHeader httpResponseHeader = new HttpResponseHeader(
+                httpRequestLine.getRequestUri().getValue() + ".html",
+                httpResponseBody.getValue()
+        );
+
+        return new HttpResponse(httpResponseBody, HttpStatus.SUCCESS, httpResponseHeader);
+    }
+
+    public HttpResponse login(HttpRequest httpRequest) {
+        final HttpRequestLine httpRequestLine = httpRequest.getHttpRequestLine();
+        final String requestBody = httpRequest.getRequestBody();
+
+        Map<String, String> requestValues = new HashMap<>();
+        final String[] firstSplit = requestBody.split("&");
+        for (String s : firstSplit) {
+            final String[] keyAndValue = s.split("=");
+            requestValues.put(keyAndValue[0], keyAndValue[1]);
+        }
+
+        if (isExistUser(requestValues)) {
 
             final HttpResponseBody httpResponseBody = new HttpResponseBody(
                     httpRequestLine.getRequestUri().getValue() + ".html");
@@ -117,52 +129,24 @@ public class HttpService {
                     httpResponseBody.getValue()
             );
 
-            return new HttpResponse(httpResponseBody, HttpStatus.SUCCESS, httpResponseHeader);
-        }
+            httpResponseHeader.addHeader("Location", "/index.html");
 
-        if (httpRequestLine.getRequestUri().endWith("login") &&
-                httpRequestLine.getMethod().equals("POST")
-        ) {
-            final String requestBody = httpRequest.getRequestBody();
-
-            Map<String, String> requestValues = new HashMap<>();
-            final String[] firstSplit = requestBody.split("&");
-            for (String s : firstSplit) {
-                final String[] keyAndValue = s.split("=");
-                requestValues.put(keyAndValue[0], keyAndValue[1]);
+            if (!httpRequest.hasSessionId()) {
+                httpResponseHeader.addSessionId();
             }
 
-            if (isExistUser(requestValues)) {
-
-                final HttpResponseBody httpResponseBody = new HttpResponseBody(
-                        httpRequestLine.getRequestUri().getValue() + ".html");
-
-                final HttpResponseHeader httpResponseHeader = new HttpResponseHeader(
-                        httpRequestLine.getRequestUri().getValue() + ".html",
-                        httpResponseBody.getValue()
-                );
-
-                httpResponseHeader.addHeader("Location", "/index.html");
-
-                if (!httpRequest.hasSessionId()) {
-                    httpResponseHeader.addSessionId();
-                }
-
-                return new HttpResponse(httpResponseBody, HttpStatus.FOUND, httpResponseHeader);
-            }
-
-            final HttpResponseBody httpResponseBody = new HttpResponseBody(
-                    "/401.html");
-
-            final HttpResponseHeader httpResponseHeader = new HttpResponseHeader(
-                    "/401.html",
-                    httpResponseBody.getValue()
-            );
-
-            return new HttpResponse(httpResponseBody, HttpStatus.UNAUTHORIZED, httpResponseHeader);
-
+            return new HttpResponse(httpResponseBody, HttpStatus.FOUND, httpResponseHeader);
         }
-        return null;
+
+        final HttpResponseBody httpResponseBody = new HttpResponseBody(
+                "/401.html");
+
+        final HttpResponseHeader httpResponseHeader = new HttpResponseHeader(
+                "/401.html",
+                httpResponseBody.getValue()
+        );
+
+        return new HttpResponse(httpResponseBody, HttpStatus.UNAUTHORIZED, httpResponseHeader);
     }
 
     private boolean isExistUser(final Map<String, String> queryParams) {
