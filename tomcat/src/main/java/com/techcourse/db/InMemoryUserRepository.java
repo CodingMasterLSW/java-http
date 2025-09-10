@@ -5,10 +5,12 @@ import com.techcourse.model.User;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class InMemoryUserRepository {
 
     private static final Map<String, User> database = new ConcurrentHashMap<>();
+    private static final AtomicLong atomicLong = new AtomicLong();
 
     static {
         final User user = new User(1L, "gugu", "password", "hkkang@woowahan.com");
