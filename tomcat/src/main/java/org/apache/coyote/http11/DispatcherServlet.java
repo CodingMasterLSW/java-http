@@ -2,11 +2,18 @@ package org.apache.coyote.http11;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.coyote.http11.controller.Controller;
+import org.apache.coyote.http11.controller.HomeController;
+import org.apache.coyote.http11.controller.LoginController;
+import org.apache.coyote.http11.controller.RegisterController;
+import org.apache.coyote.http11.controller.StaticResourceController;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestUri;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpResponseBody;
 import org.apache.coyote.http11.response.HttpResponseHeader;
+import org.apache.coyote.http11.response.HttpStatus;
+import org.apache.coyote.http11.service.HttpService;
 
 public class DispatcherServlet {
 

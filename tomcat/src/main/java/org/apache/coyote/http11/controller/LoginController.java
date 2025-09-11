@@ -1,24 +1,24 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.controller;
 
+import org.apache.coyote.http11.service.HttpService;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
-public class HomeController extends AbstractController {
+public class LoginController extends AbstractController {
 
     private final HttpService httpService;
 
-    public HomeController(final HttpService httpService) {
+    public LoginController(final HttpService httpService) {
         this.httpService = httpService;
     }
 
     @Override
     protected HttpResponse doPost(final HttpRequest request) {
-        // 아직 기능 존재X
-        return null;
+        return httpService.login(request);
     }
 
     @Override
     protected HttpResponse doGet(final HttpRequest request) {
-        return httpService.indexProcess(request.getHttpRequestLine());
+        return httpService.getLoginPage(request);
     }
 }

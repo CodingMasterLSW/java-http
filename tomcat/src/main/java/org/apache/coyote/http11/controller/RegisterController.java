@@ -1,5 +1,6 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.controller;
 
+import org.apache.coyote.http11.service.HttpService;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 

@@ -2,7 +2,6 @@ package org.apache.coyote.http11.response;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import org.apache.coyote.http11.HttpStatus;
 
 public class HttpResponse {
 
