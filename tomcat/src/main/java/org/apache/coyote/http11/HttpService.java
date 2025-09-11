@@ -76,7 +76,9 @@ public class HttpService {
                 httpRequestLine.getRequestUri().getValue(),
                 httpResponseBody.getValue()
         );
-        return new HttpResponse(httpResponseBody, HttpStatus.SUCCESS, httpResponseHeader);
+        httpResponseHeader.addHeader("Location", "/index.html");
+
+        return new HttpResponse(httpResponseBody, HttpStatus.FOUND, httpResponseHeader);
     }
 
     public HttpResponse getLoginPage(HttpRequest httpRequest) {
@@ -86,12 +88,15 @@ public class HttpService {
             final Optional<Session> session = sessionManager.findSession(sessionId);
             if (session.isPresent()) {
                 final HttpResponseBody httpResponseBody = new HttpResponseBody(
-                        "/index.html");
+                        httpRequestLine.getRequestUri().getValue() + ".html");
 
                 final HttpResponseHeader httpResponseHeader = new HttpResponseHeader(
-                        "/index.html",
+                        httpRequestLine.getRequestUri().getValue() + ".html",
                         httpResponseBody.getValue()
                 );
+
+                httpResponseHeader.addHeader("Location", "/index.html");
+
                 return new HttpResponse(httpResponseBody, HttpStatus.SUCCESS,
                         httpResponseHeader);
             }

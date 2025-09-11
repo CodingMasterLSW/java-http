@@ -53,7 +53,6 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-
     private HttpRequestHeader parseHeaders(final BufferedReader br) throws IOException {
         Map<String, String> headers = new HashMap<>();
         String headerLine;
