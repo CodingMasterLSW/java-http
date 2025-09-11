@@ -3,8 +3,6 @@ package org.apache.coyote.http11;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.util.HashMap;
-import java.util.Map;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestHeader;
@@ -41,7 +39,7 @@ public class Http11Processor implements Runnable, Processor {
             BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
             String firstLine = br.readLine();
 
-            final HttpRequestHeader httpRequestHeader = parseHeaders(br);
+            final HttpRequestHeader httpRequestHeader = HttpRequestHeader.createFrom(br);
             HttpRequestLine httpRequestLine = HttpRequestLine.createFrom(firstLine);
             HttpRequest httpRequest = new HttpRequest(httpRequestLine, httpRequestHeader, br);
 
@@ -51,17 +49,5 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private HttpRequestHeader parseHeaders(final BufferedReader br) throws IOException {
-        Map<String, String> headers = new HashMap<>();
-        String headerLine;
-        while ((headerLine = br.readLine()) != null && !headerLine.isEmpty()) {
-            int idx = headerLine.indexOf(":");
-            String key = headerLine.substring(0, idx).trim();
-            String value = headerLine.substring(idx + 1).trim();
-            headers.put(key, value);
-        }
-        return new HttpRequestHeader(headers);
     }
 }
