@@ -10,6 +10,7 @@ public class HttpResponseHeader {
     private static final String CSS_TYPE = "text/css;";
     private static final String JS_TYPE = "application/javascript;";
     private static final String CHARSET = "charset=utf-8";
+
     private final Map<String, String> responseHeader;
 
     public HttpResponseHeader(final String requestUri, final byte[] body) {
@@ -26,7 +27,7 @@ public class HttpResponseHeader {
         responseHeader.put(key, value);
     }
 
-    private void parseContentType(final String requestUri) {
+    public void parseContentType(final String requestUri) {
         String contentType = "Content-Type";
         if (requestUri.endsWith(".html")) {
             responseHeader.put(contentType, HTML_TYPE + CHARSET);
@@ -41,7 +42,7 @@ public class HttpResponseHeader {
         }
     }
 
-    private void putContentLength(byte[] body) {
+    public void putContentLength(byte[] body) {
         if (body == null) {
             responseHeader.put("Content-Length", "0");
             return;

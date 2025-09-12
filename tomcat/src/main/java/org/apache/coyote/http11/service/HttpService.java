@@ -26,22 +26,6 @@ public class HttpService {
         this.sessionManager = sessionManager;
     }
 
-    public HttpResponse indexProcess(HttpRequestLine httpRequestLine) {
-
-        final HttpResponseBody httpResponseBody = new HttpResponseBody(
-                httpRequestLine.getRequestUri().getValue());
-        final HttpResponseHeader httpResponseHeader = new HttpResponseHeader(
-                httpRequestLine.getRequestUri().getValue(),
-                httpResponseBody.getValue()
-        );
-
-        if (!httpRequestLine.getRequestUri().isExistFile()) {
-            return new HttpResponse(httpResponseBody, HttpStatus.NOT_FOUND, httpResponseHeader);
-        }
-
-        return new HttpResponse(httpResponseBody, HttpStatus.SUCCESS, httpResponseHeader);
-    }
-
     public HttpResponse getRegisterPage(HttpRequest httpRequest) {
         final HttpRequestLine httpRequestLine = httpRequest.getHttpRequestLine();
         httpRequestLine.modifyRequestUri(httpRequestLine.getRequestUri().convertHtmlFromUri());
@@ -55,7 +39,7 @@ public class HttpService {
         return new HttpResponse(httpResponseBody, HttpStatus.SUCCESS, httpResponseHeader);
     }
 
-    public HttpResponse saveRegister(HttpRequest httpRequest) {
+    public void saveRegister(HttpRequest httpRequest) {
         final HttpRequestLine httpRequestLine = httpRequest.getHttpRequestLine();
         final String requestBody = httpRequest.getRequestBody();
         Map<String, String> requestValues = new HashMap<>();

@@ -26,8 +26,8 @@ public class DispatcherServlet {
         handlerMapping.put("/login", new LoginController(httpService));
         handlerMapping.put("/register", new RegisterController(httpService));
 
-        handlerMapping.put("/", new HomeController(httpService));
-        handlerMapping.put("/index.html", new HomeController(httpService));
+        handlerMapping.put("/", new HomeController());
+        handlerMapping.put("/index.html", new HomeController());
     }
 
     public HttpResponse service(HttpRequest request) {
@@ -40,10 +40,13 @@ public class DispatcherServlet {
 
         final Controller controller = handlerMapping.get(requestUriValue);
         if (controller == null) {
-            final HttpResponseBody responseBody = new HttpResponseBody("/404.html");
-            return new HttpResponse(responseBody, HttpStatus.NOT_FOUND,
-                    new HttpResponseHeader("/404.html", responseBody.getValue()));
+
+            HttpResponseBody responseBody = new HttpResponseBody("/404.html".getBytes());
+            HttpResponseHeader responseHeader = new HttpResponseHeader(requestUri.getValue(),
+                    responseBody.getValue());
+            return new HttpResponse(responseBody, HttpStatus.NOT_FOUND, responseHeader);
         }
+
         return controller.service(request);
     }
 

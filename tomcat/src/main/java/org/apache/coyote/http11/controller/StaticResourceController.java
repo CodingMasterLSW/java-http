@@ -1,13 +1,16 @@
 package org.apache.coyote.http11.controller;
 
-import java.net.URL;
 import org.apache.coyote.http11.response.HttpStatus;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpResponseBody;
 import org.apache.coyote.http11.response.HttpResponseHeader;
+import org.apache.coyote.http11.response.ResponseData;
+import org.apache.coyote.http11.response.ResponseGenerator;
 
 public class StaticResourceController extends AbstractController {
+
+    private final ResponseGenerator responseGenerator = new ResponseGenerator();
 
     @Override
     protected HttpResponse doPost(final HttpRequest request) {
@@ -18,16 +21,14 @@ public class StaticResourceController extends AbstractController {
     @Override
     protected HttpResponse doGet(final HttpRequest request) {
         String uri = request.getHttpRequestLine().getRequestUri().getValue();
-        URL resource = getClass().getClassLoader().getResource("static" + uri);
-        if (resource == null) {
-            new HttpResponse(
-                    new HttpResponseBody("/404.html"),
-                    HttpStatus.NOT_FOUND,
-                    new HttpResponseHeader("/404.html", "/404.html".getBytes()));
+        final ResponseData responseData = responseGenerator.calculateBytes(uri);
+        final HttpResponseBody responseBody = new HttpResponseBody(responseData.value());
+        final HttpResponseHeader responseHeader = new HttpResponseHeader(
+                uri, responseBody.getValue());
+
+        if (responseData.isExistFile()) {
+            return new HttpResponse(responseBody, HttpStatus.NOT_FOUND, responseHeader);
         }
-        final HttpResponseBody httpResponseBody = new HttpResponseBody(uri);
-        final HttpResponseHeader httpResponseHeader = new HttpResponseHeader(uri,
-                httpResponseBody.calculateBytes(uri));
-        return new HttpResponse(httpResponseBody, HttpStatus.SUCCESS, httpResponseHeader);
+        return new HttpResponse(responseBody, HttpStatus.SUCCESS, responseHeader);
     }
 }
