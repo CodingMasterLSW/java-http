@@ -13,7 +13,7 @@ import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpResponseBody;
 import org.apache.coyote.http11.response.HttpResponseHeader;
 import org.apache.coyote.http11.response.HttpStatus;
-import org.apache.coyote.http11.service.HttpService;
+import org.apache.coyote.http11.service.LoginService;
 import org.apache.coyote.http11.service.RegisterService;
 
 public class DispatcherServlet {
@@ -23,9 +23,9 @@ public class DispatcherServlet {
     private final StaticResourceController staticResourceController = new StaticResourceController();
 
     public DispatcherServlet() {
-        HttpService httpService = new HttpService(sessionManager);
         RegisterService registerService = new RegisterService();
-        handlerMapping.put("/login", new LoginController(httpService));
+        LoginService loginService = new LoginService();
+        handlerMapping.put("/login", new LoginController(loginService));
         handlerMapping.put("/register", new RegisterController(registerService));
 
         handlerMapping.put("/", new HomeController());

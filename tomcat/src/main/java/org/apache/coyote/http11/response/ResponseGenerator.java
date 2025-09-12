@@ -14,7 +14,7 @@ public class ResponseGenerator {
         }
         try {
             final byte[] bytes = Files.readAllBytes(Path.of(resource.getFile()));
-            if (resource == null) {
+            if (resource.getFile().equals("static/404.html")) {
                 return new ResponseData(bytes, false);
             }
             return new ResponseData(bytes, true);

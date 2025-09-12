@@ -1,3 +1,4 @@
+/*
 package org.apache.coyote.http11.service;
 
 import static org.reflections.Reflections.log;
@@ -24,38 +25,6 @@ public class HttpService {
 
     public HttpService(final SessionManager sessionManager) {
         this.sessionManager = sessionManager;
-    }
-
-    public HttpResponse getLoginPage(HttpRequest httpRequest) {
-        final HttpRequestLine httpRequestLine = httpRequest.getHttpRequestLine();
-        if (httpRequest.hasSessionId()) {
-            final String sessionId = httpRequest.getSessionId();
-            final Optional<Session> session = sessionManager.findSession(sessionId);
-            if (session.isPresent()) {
-                final HttpResponseBody httpResponseBody = new HttpResponseBody(
-                        httpRequestLine.getRequestUri().getValue() + ".html");
-
-                final HttpResponseHeader httpResponseHeader = new HttpResponseHeader(
-                        httpRequestLine.getRequestUri().getValue() + ".html",
-                        httpResponseBody.getValue()
-                );
-
-                httpResponseHeader.addHeader("Location", "/index.html");
-
-                return new HttpResponse(httpResponseBody, HttpStatus.SUCCESS,
-                        httpResponseHeader);
-            }
-        }
-
-        final HttpResponseBody httpResponseBody = new HttpResponseBody(
-                httpRequestLine.getRequestUri().getValue() + ".html");
-
-        final HttpResponseHeader httpResponseHeader = new HttpResponseHeader(
-                httpRequestLine.getRequestUri().getValue() + ".html",
-                httpResponseBody.getValue()
-        );
-
-        return new HttpResponse(httpResponseBody, HttpStatus.SUCCESS, httpResponseHeader);
     }
 
     public HttpResponse login(HttpRequest httpRequest) {
@@ -119,3 +88,4 @@ public class HttpService {
         return false;
     }
 }
+*/
