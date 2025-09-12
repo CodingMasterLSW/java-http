@@ -13,6 +13,8 @@ import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpResponseBody;
 import org.apache.coyote.http11.response.HttpResponseHeader;
 import org.apache.coyote.http11.response.HttpStatus;
+import org.apache.coyote.http11.response.ResponseData;
+import org.apache.coyote.http11.response.ResponseGenerator;
 import org.apache.coyote.http11.service.LoginService;
 import org.apache.coyote.http11.service.RegisterService;
 
@@ -20,6 +22,7 @@ public class DispatcherServlet {
 
     private final Map<String, Controller> handlerMapping = new HashMap<>();
     private final SessionManager sessionManager = SessionManager.getInstance();
+    private final ResponseGenerator responseGenerator = new ResponseGenerator();
     private final StaticResourceController staticResourceController = new StaticResourceController();
 
     public DispatcherServlet() {
@@ -42,8 +45,10 @@ public class DispatcherServlet {
 
         final Controller controller = handlerMapping.get(requestUriValue);
         if (controller == null) {
+            final ResponseData responseData = responseGenerator.calculateByteFromStaticResource(
+                    "/404.html");
 
-            HttpResponseBody responseBody = new HttpResponseBody("/404.html".getBytes());
+            HttpResponseBody responseBody = new HttpResponseBody(responseData.value());
             HttpResponseHeader responseHeader = new HttpResponseHeader(requestUri.getValue(),
                     responseBody.getValue());
             return new HttpResponse(responseBody, HttpStatus.NOT_FOUND, responseHeader);
