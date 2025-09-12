@@ -26,7 +26,7 @@ public class StaticResourceController extends AbstractController {
         final HttpResponseHeader responseHeader = new HttpResponseHeader(
                 uri, responseBody.getValue());
 
-        if (responseData.isExistFile()) {
+        if (!responseData.isExistFile()) {
             return new HttpResponse(responseBody, HttpStatus.NOT_FOUND, responseHeader);
         }
         return new HttpResponse(responseBody, HttpStatus.SUCCESS, responseHeader);
