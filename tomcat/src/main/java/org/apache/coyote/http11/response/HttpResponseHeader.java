@@ -19,10 +19,6 @@ public class HttpResponseHeader {
         putContentLength(body);
     }
 
-    public void addSessionId() {
-        responseHeader.put("Set-Cookie", "JSESSIONID=" + UUID.randomUUID().toString());
-    }
-
     public void addHeader(String key, String value) {
         responseHeader.put(key, value);
     }

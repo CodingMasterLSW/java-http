@@ -1,6 +1,9 @@
 package org.apache.coyote.http11.controller;
 
+import com.techcourse.model.User;
 import java.util.Optional;
+import java.util.UUID;
+import org.apache.coyote.http11.Cookie;
 import org.apache.coyote.http11.Session;
 import org.apache.coyote.http11.SessionManager;
 import org.apache.coyote.http11.request.HttpRequestLine;
@@ -29,10 +32,17 @@ public class LoginController extends AbstractController {
         final RequestUri requestUri = request.getHttpRequestLine().getRequestUri();
         final RequestUri htmlRequestUri = requestUri.convertHtmlFromUri();
 
-        boolean loginStatus = loginService.login(request.getRequestBody());
+        final Optional<User> findUser = loginService.login(request.getRequestBody());
 
-        if (loginStatus) {
-            return loginProcess(htmlRequestUri);
+        if (findUser.isPresent()) {
+            final HttpResponse httpResponse = loginProcess(htmlRequestUri);
+            Session session = new Session(UUID.randomUUID().toString());
+            session.setAttribute("user", findUser.get());
+            sessionManager.add(session);
+            Cookie.addCookie("JSESSIONID", session.getId());
+            final HttpResponseHeader responseHeader = httpResponse.getResponseHeader();
+            responseHeader.addHeader("Set-Cookie", "JSESSIONID="+UUID.randomUUID().toString());
+            return httpResponse;
         }
         return invalidLoginProcess();
     }
