@@ -14,6 +14,7 @@ import org.apache.coyote.http11.response.HttpResponseBody;
 import org.apache.coyote.http11.response.HttpResponseHeader;
 import org.apache.coyote.http11.response.HttpStatus;
 import org.apache.coyote.http11.service.HttpService;
+import org.apache.coyote.http11.service.RegisterService;
 
 public class DispatcherServlet {
 
@@ -23,8 +24,9 @@ public class DispatcherServlet {
 
     public DispatcherServlet() {
         HttpService httpService = new HttpService(sessionManager);
+        RegisterService registerService = new RegisterService();
         handlerMapping.put("/login", new LoginController(httpService));
-        handlerMapping.put("/register", new RegisterController(httpService));
+        handlerMapping.put("/register", new RegisterController(registerService));
 
         handlerMapping.put("/", new HomeController());
         handlerMapping.put("/index.html", new HomeController());

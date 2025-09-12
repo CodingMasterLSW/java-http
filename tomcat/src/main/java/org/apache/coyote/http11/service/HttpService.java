@@ -26,49 +26,6 @@ public class HttpService {
         this.sessionManager = sessionManager;
     }
 
-    public HttpResponse getRegisterPage(HttpRequest httpRequest) {
-        final HttpRequestLine httpRequestLine = httpRequest.getHttpRequestLine();
-        httpRequestLine.modifyRequestUri(httpRequestLine.getRequestUri().convertHtmlFromUri());
-        final HttpResponseBody httpResponseBody = new HttpResponseBody(
-                httpRequestLine.getRequestUri().getValue());
-
-        final HttpResponseHeader httpResponseHeader = new HttpResponseHeader(
-                httpRequestLine.getRequestUri().getValue(),
-                httpResponseBody.getValue()
-        );
-        return new HttpResponse(httpResponseBody, HttpStatus.SUCCESS, httpResponseHeader);
-    }
-
-    public void saveRegister(HttpRequest httpRequest) {
-        final HttpRequestLine httpRequestLine = httpRequest.getHttpRequestLine();
-        final String requestBody = httpRequest.getRequestBody();
-        Map<String, String> requestValues = new HashMap<>();
-        final String[] firstSplit = requestBody.split("&");
-        for (String s : firstSplit) {
-            final String[] keyAndValue = s.split("=");
-            requestValues.put(keyAndValue[0], keyAndValue[1]);
-        }
-
-        User user = new User(
-                requestValues.get("account"),
-                requestValues.get("password"),
-                requestValues.get("email")
-        );
-
-        InMemoryUserRepository.save(user);
-
-        final HttpResponseBody httpResponseBody = new HttpResponseBody(
-                httpRequestLine.getRequestUri().getValue());
-
-        final HttpResponseHeader httpResponseHeader = new HttpResponseHeader(
-                httpRequestLine.getRequestUri().getValue(),
-                httpResponseBody.getValue()
-        );
-        httpResponseHeader.addHeader("Location", "/index.html");
-
-        return new HttpResponse(httpResponseBody, HttpStatus.FOUND, httpResponseHeader);
-    }
-
     public HttpResponse getLoginPage(HttpRequest httpRequest) {
         final HttpRequestLine httpRequestLine = httpRequest.getHttpRequestLine();
         if (httpRequest.hasSessionId()) {

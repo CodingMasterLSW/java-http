@@ -7,12 +7,11 @@ import java.nio.file.Path;
 
 public class ResponseGenerator {
 
-    public ResponseData calculateBytes(String taget) {
+    public ResponseData calculateByteFromStaticResource(String taget) {
         URL resource = getClass().getClassLoader().getResource("static" + taget);
         if (resource == null) {
             resource = getClass().getClassLoader().getResource("static/404.html");
         }
-
         try {
             final byte[] bytes = Files.readAllBytes(Path.of(resource.getFile()));
             if (resource == null) {

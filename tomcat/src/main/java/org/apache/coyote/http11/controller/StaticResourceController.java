@@ -21,7 +21,7 @@ public class StaticResourceController extends AbstractController {
     @Override
     protected HttpResponse doGet(final HttpRequest request) {
         String uri = request.getHttpRequestLine().getRequestUri().getValue();
-        final ResponseData responseData = responseGenerator.calculateBytes(uri);
+        final ResponseData responseData = responseGenerator.calculateByteFromStaticResource(uri);
         final HttpResponseBody responseBody = new HttpResponseBody(responseData.value());
         final HttpResponseHeader responseHeader = new HttpResponseHeader(
                 uri, responseBody.getValue());
